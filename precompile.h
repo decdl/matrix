@@ -8,7 +8,7 @@
 #include <string>
 #include <vector>
 #include <utility>
-#include "vector_row.h"
+#include "vector.h"
 #include "frac.h"
 
 #endif

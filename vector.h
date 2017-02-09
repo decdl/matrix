@@ -7,38 +7,38 @@
 #include <utility>
 
 template<typename T>
-class vector_row : private std::vector<T>
+class vector : private std::vector<T>
 {
 	public:
 		typedef typename std::vector<T>::const_iterator const_iterator;
 		typedef typename std::vector<T>::iterator iterator;
 
 		// default constructor
-		vector_row() : std::vector<T>() {}
+		vector() : std::vector<T>() {}
 
 		// copy-constructor with rvlaue
-		vector_row(vector_row &&v) : std::vector<T>(v) {}
+		vector(vector &&v) : std::vector<T>(v) {}
 
 		// copy-constructor with lvalue
-		vector_row(const vector_row &v) : std::vector<T>(v) {}
+		vector(const vector &v) : std::vector<T>(v) {}
 
 		// constructor with rvalue
 		template<typename... Args>
-		explicit vector_row(Args&&... args) : std::vector<T>(args...) {}
+		explicit vector(Args&&... args) : std::vector<T>(args...) {}
 
 		// constructor with lvalue
 		template<typename... Args>
-		explicit vector_row(const Args&... args) : std::vector<T>(args...) {}
+		explicit vector(const Args&... args) : std::vector<T>(args...) {}
 
 		// copy-assign operator with rvalue
-		inline vector_row &operator=(vector_row &&v)
+		inline vector &operator=(vector &&v)
 		{
 			std::vector<T>::operator=(v);
 			return *this;
 		}
 
 		// copy-assign operator with lvalue
-		inline vector_row &operator=(const vector_row &v)
+		inline vector &operator=(const vector &v)
 		{
 			std::vector<T>::operator=(v);
 			return *this;
@@ -97,7 +97,7 @@ class vector_row : private std::vector<T>
 
 		// scalar division
 		template<typename scalar>
-		inline vector_row &operator/=(scalar c)
+		inline vector &operator/=(scalar c)
 		{
 			for (T &e : *this)
 				e /= c;
@@ -107,9 +107,9 @@ class vector_row : private std::vector<T>
 
 // scalar multiplication
 template<typename T, typename scalar>
-inline vector_row<T> operator*(const scalar &c, const vector_row<T> &v)
+inline vector<T> operator*(const scalar &c, const vector<T> &v)
 {
-	vector_row<T> row(v);
+	vector<T> row(v);
 	for (T &e : row)
 		e *= c;
 	return std::move(row);
@@ -117,12 +117,12 @@ inline vector_row<T> operator*(const scalar &c, const vector_row<T> &v)
 
 // vector addition
 template<typename T>
-inline vector_row<T> operator+(const vector_row<T> &lhs, const vector_row<T> &rhs)
+inline vector<T> operator+(const vector<T> &lhs, const vector<T> &rhs)
 {
 	if (lhs.size() != rhs.size())
 		throw L"Exception: vector adding with different dimensions";
-	vector_row<T> row(lhs);
-	typename vector_row<T>::iterator it0 = row.begin(),
+	vector<T> row(lhs);
+	typename vector<T>::iterator it0 = row.begin(),
 									 it1 = rhs.begin();
 	while (it0 != row.end())
 		*(it0++) += *(it1++);
@@ -131,13 +131,13 @@ inline vector_row<T> operator+(const vector_row<T> &lhs, const vector_row<T> &rh
 
 // vector subtraction
 template<typename T>
-inline vector_row<T> operator-(const vector_row<T> &lhs, const vector_row<T> &rhs)
+inline vector<T> operator-(const vector<T> &lhs, const vector<T> &rhs)
 {
 	if (lhs.size() != rhs.size())
 		throw L"Exception: vector subtracting with different dimensions";
-	vector_row<T> row(lhs);
-	typename vector_row<T>::iterator it0 = row.begin();
-	typename vector_row<T>::const_iterator it1 = rhs.begin();
+	vector<T> row(lhs);
+	typename vector<T>::iterator it0 = row.begin();
+	typename vector<T>::const_iterator it1 = rhs.begin();
 	while (it0 != row.end())
 		*(it0++) -= *(it1++);
 	return std::move(row);

@@ -5,7 +5,7 @@ typedef Frac<unsigned int> data_t;
 
 int main()
 {
-	std::vector<vector_row<data_t>> matrix;
+	std::vector<vector<data_t>> matrix;
 
 	// input
 	while (!std::wcin.eof())
@@ -44,7 +44,7 @@ int main()
 	}
 
 	// output
-	for (const vector_row<data_t> &row : matrix)
+	for (const vector<data_t> &row : matrix)
 	{
 		bool first_entry = true;
 		for (const data_t &entry : row)

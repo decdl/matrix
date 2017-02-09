@@ -4,3 +4,5 @@
 # C/C++ precompiled header
 *.h.gch
 
+# final executable
+matrix
