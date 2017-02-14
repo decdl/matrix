@@ -9,6 +9,7 @@
 #include <vector>
 #include <utility>
 #include "vector.h"
+#include "matrix.h"
 #include "frac.h"
 
 #endif

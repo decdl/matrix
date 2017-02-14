@@ -9,7 +9,7 @@
 #include <sstream>
 
 template<typename T>
-class Frac
+class frac
 {
 	private:
 		bool s;
@@ -19,20 +19,20 @@ class Frac
 	public:
 		const T &num, &den;
 		const bool &neg;
-		Frac(T numerator = 0, bool negative = false, T denominator = 1) : s(negative), n(numerator), d(denominator), num(n), den(d), neg(s) {standarize();}
-		Frac(const Frac<T> &rhs) : s(rhs.s), n(rhs.n), d(rhs.d), num(n), den(d), neg(s) {}
-		inline Frac<T> & operator=(const Frac<T> &rhs);
+		frac(T numerator = 0, bool negative = false, T denominator = 1) : s(negative), n(numerator), d(denominator), num(n), den(d), neg(s) {standarize();}
+		frac(const frac<T> &rhs) : s(rhs.s), n(rhs.n), d(rhs.d), num(n), den(d), neg(s) {}
+		inline frac<T> & operator=(const frac<T> &rhs);
 		operator double() const {return s ? - static_cast<double>(n) / static_cast<double>(d) : static_cast<double>(n) / static_cast<double>(d);}
-		Frac<T> operator-() const {return Frac<T>(n, !neg, d);}
-		Frac<T> inverse() const {return Frac<T>(d, neg, n);}
-		inline Frac<T> & operator+=(const Frac<T> &rhs);
-		inline Frac<T> & operator-=(const Frac<T> &rhs);
-		inline Frac<T> & operator*=(const Frac<T> &rhs);
-		inline Frac<T> & operator/=(const Frac<T> &rhs);
+		frac<T> operator-() const {return frac<T>(n, !neg, d);}
+		frac<T> inverse() const {return frac<T>(d, neg, n);}
+		inline frac<T> & operator+=(const frac<T> &rhs);
+		inline frac<T> & operator-=(const frac<T> &rhs);
+		inline frac<T> & operator*=(const frac<T> &rhs);
+		inline frac<T> & operator/=(const frac<T> &rhs);
 };
 
 template<typename T>
-T Frac<T>::gcd(T x, T y)
+T frac<T>::gcd(T x, T y)
 {
 	if (y == 0)
 		return x;
@@ -40,7 +40,7 @@ T Frac<T>::gcd(T x, T y)
 }
 
 template<typename T>
-inline void Frac<T>::standarize()
+inline void frac<T>::standarize()
 {
 	if (d == 0)
 		throw "Denominator is 0";
@@ -50,80 +50,81 @@ inline void Frac<T>::standarize()
 }
 
 template<typename T>
-inline Frac<T> & Frac<T>::operator=(const Frac<T> &rhs)
+inline frac<T> & frac<T>::operator=(const frac<T> &rhs)
 {
 	s = rhs.s;
 	n = rhs.n;
 	d = rhs.d;
+	return *this;
 }
 
 template<typename T>
-Frac<T> operator+(const Frac<T> &lhs, const Frac<T> &rhs)
+frac<T> operator+(const frac<T> &lhs, const frac<T> &rhs)
 {
 	if (lhs.neg)
 		return -(-lhs + -rhs);
 	if (rhs.neg)
 		return lhs - -rhs;
-	return Frac<T>(
+	return frac<T>(
 			lhs.num * rhs.den + rhs.num * lhs.den, false,
 			lhs.den * rhs.den);
 }
 
 template<typename T>
-Frac<T> operator-(const Frac<T> &lhs, const Frac<T> &rhs)
+frac<T> operator-(const frac<T> &lhs, const frac<T> &rhs)
 {
 	if (lhs.neg)
 		return -(-lhs + rhs);
 	if (rhs.neg)
 		return lhs + -rhs;
 	bool negative = lhs.num * rhs.den < rhs.num * lhs.den;
-	return Frac<T>(
+	return frac<T>(
 			negative ? rhs.num * lhs.den - lhs.num * rhs.den : lhs.num * rhs.den - rhs.num * lhs.den,
 			negative,
 			lhs.den * rhs.den);
 }
 
 template<typename T>
-Frac<T> operator*(const Frac<T> &lhs, const Frac<T> &rhs)
+frac<T> operator*(const frac<T> &lhs, const frac<T> &rhs)
 {
-	return Frac<T>(
+	return frac<T>(
 			lhs.num * rhs.num,
 			!lhs.neg == rhs.neg,
 			lhs.den * rhs.den);
 }
 
 template<typename T>
-Frac<T> operator/(const Frac<T> &lhs, const Frac<T> &rhs)
+frac<T> operator/(const frac<T> &lhs, const frac<T> &rhs)
 {
 	return lhs * rhs.inverse();
 }
 
 template<typename T>
-inline Frac<T> & Frac<T>::operator+=(const Frac<T> &rhs)
+inline frac<T> & frac<T>::operator+=(const frac<T> &rhs)
 {
 	return *this = *this + rhs;
 }
 
 template<typename T>
-inline Frac<T> & Frac<T>::operator-=(const Frac<T> &rhs)
+inline frac<T> & frac<T>::operator-=(const frac<T> &rhs)
 {
 	return *this = *this - rhs;
 }
 
 template<typename T>
-inline Frac<T> & Frac<T>::operator*=(const Frac<T> &rhs)
+inline frac<T> & frac<T>::operator*=(const frac<T> &rhs)
 {
 	return *this = *this * rhs;
 }
 
 template<typename T>
-inline Frac<T> & Frac<T>::operator/=(const Frac<T> &rhs)
+inline frac<T> & frac<T>::operator/=(const frac<T> &rhs)
 {
 	return *this = *this / rhs;
 }
 
 template<typename OutputStream, typename T>
-inline OutputStream & operator<<(OutputStream &os, const Frac<T> &f)
+inline OutputStream & operator<<(OutputStream &os, const frac<T> &f)
 {
 	if (f.neg && f.num != 0)
 		os << '-';
@@ -134,7 +135,7 @@ inline OutputStream & operator<<(OutputStream &os, const Frac<T> &f)
 }
 
 template<typename InputStream, typename T>
-inline InputStream & operator>>(InputStream &is, Frac<T> &f)
+inline InputStream & operator>>(InputStream &is, frac<T> &f)
 {
 	std::wstring s;
 	T num, den = 1;
@@ -155,7 +156,7 @@ inline InputStream & operator>>(InputStream &is, Frac<T> &f)
 		iss.str(s.substr(slash_pos + 1));
 		iss >> den;
 	}
-	f = Frac<T>(num, neg, den);
+	f = frac<T>(num, neg, den);
 	return is;
 }
 

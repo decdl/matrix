@@ -11,7 +11,7 @@ matrix: matrix.o
 matrix.o: matrix.cpp precompile.h.gch
 	$(CXX) $(CXX_FLAGS) matrix.cpp -o matrix.o
 
-precompile.h.gch: precompile.h vector.h frac.h
+precompile.h.gch: precompile.h vector.h matrix.h frac.h
 	$(CXX) $(CXX_FLAGS) precompile.h -o precompile.h.gch
 
 clean:
