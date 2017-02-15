@@ -301,7 +301,7 @@ class vector : private std::vector<T*>
 		inline T dot(const vector &rhs) const
 		{
 			if (size() != rhs.size())
-				throw "Exception: dot product between different dimensions";
+				throw L"Exception: dot product between different dimensions";
 			T result = static_cast<T>(0);
 			const_iterator it0 = begin(),
 						   it1 = rhs.begin();

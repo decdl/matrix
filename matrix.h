@@ -51,7 +51,7 @@ class matrix
 		matrix & add_row(const vector<T> &v)
 		{
 			if (v.size() != col())
-				throw "Exception: adding rows with different dimensions";
+				throw L"Exception: adding rows with different dimensions";
 			e.emplace_back(v);
 			return *this;
 		}
@@ -60,7 +60,7 @@ class matrix
 		matrix & add_col(const vector<T> &v)
 		{
 			if (v.size() != row())
-				throw "Exception: adding cols with different dimensions";
+				throw L"Exception: adding cols with different dimensions";
 			for (size_t i = 0; i < v.size(); i++)
 				e[i].emplace_back(v[i]);
 			return *this;
@@ -202,13 +202,14 @@ class matrix
 		T det() const
 		{
 			if (row() != col())
-				throw "Exception: determinant of non-square matrix";
+				throw L"Exception: determinant of non-square matrix";
 			if (row() == 1)
 				return e[0][0];
 
 			T result = static_cast<T>(0);
 			for (size_t j = 0; j < col(); j++)
 			{
+				// calculate cofactor
 				matrix A(row()-1, 0);
 				for (size_t i = 0; i < A.row(); i++)
 				{
