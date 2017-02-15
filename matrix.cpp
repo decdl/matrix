@@ -3,9 +3,9 @@
 
 int main()
 {
-	matrix<frac<unsigned int>> A;
+	matrix<frac<uint64_t>> A;
 	std::wcin >> A;
-	A.reduce_to_ref();
-	std::wcout << A << std::endl;
+	std::wcout << A.ref() << std::endl;
+	std::wcout << A.det() << std::endl;
 	return 0;
 }

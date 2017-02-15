@@ -223,9 +223,11 @@ class vector : private std::vector<T*>
 
 		// divided by a scalar
 		template<typename scalar>
-		inline vector operator/(scalar c)
+		inline std::vector<T> operator/(scalar c) const
 		{
-			return vector(*this) /= c;
+			std::vector<T> result(begin(), end());
+			vector(result) /= c;
+			return result;
 		}
 
 		// compound multipling a scalar
@@ -239,16 +241,20 @@ class vector : private std::vector<T*>
 
 		// multipling a scalar
 		template<typename scalar>
-		inline vector operator*(scalar c)
+		inline std::vector<T> operator*(scalar c) const
 		{
-			return vector(*this) *= c;
+			std::vector<T> result(begin(), end());
+			vector(result) *= c;
+			return result;
 		}
 
 		// multiplied by a scalar
 		template<typename scalar>
-		friend inline vector operator*(scalar c, vector v)
+		friend inline std::vector<T> operator*(scalar c, const vector &v)
 		{
-			return v *= c;
+			std::vector<T> result(v.begin(), v.end());
+			vector(result) *= c;
+			return result;
 		}
 
 		// compound adding a vector
@@ -264,9 +270,11 @@ class vector : private std::vector<T*>
 		}
 
 		// adding vectors
-		inline vector operator+(const vector &rhs)
+		inline std::vector<T> operator+(const vector &rhs) const
 		{
-			return vector(*this) += rhs;
+			std::vector<T> result(begin(), end());
+			vector(result) += rhs;
+			return result;
 		}
 
 		// compound subtracting a vector
@@ -282,11 +290,25 @@ class vector : private std::vector<T*>
 		}
 
 		// subtracting vectors
-		inline vector operator-(const vector &rhs)
+		inline std::vector<T> operator-(const vector &rhs) const
 		{
-			return vector(*this) -= rhs;
+			std::vector<T> result(begin(), end());
+			vector(result) -= rhs;
+			return result;
 		}
 
+		// dot product
+		inline T dot(const vector &rhs) const
+		{
+			if (size() != rhs.size())
+				throw "Exception: dot product between different dimensions";
+			T result = static_cast<T>(0);
+			const_iterator it0 = begin(),
+						   it1 = rhs.begin();
+			while (it0 != end())
+				result += *(it0++) * *(it1++);
+			return result;
+		}
 };
 
 #endif

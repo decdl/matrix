@@ -19,6 +19,53 @@ class matrix
 		matrix(const matrix &A) : e(A.e) {}
 		matrix(matrix &&A) : e(A.e) {}
 
+		// assign operators
+		matrix & operator=(const matrix &A) {e = A.e; return *this;}
+
+		// clear
+		matrix & clear() {e.clear(); return *this;}
+
+		// resize
+		matrix & resize(size_t r, size_t c)
+		{
+			e.resize(r);
+			for (std::vector<T> &v : e)
+				v.resize(c);
+			return *this;
+		}
+
+		// reserve
+		matrix & reserve_row(size_t r)
+		{
+			e.reserve(r);
+			return *this;
+		}
+		matrix & reserve_col(size_t c)
+		{
+			for (std::vector<T> &v : e)
+				v.reserve(c);
+			return *this;
+		}
+
+		// add rows
+		matrix & add_row(const vector<T> &v)
+		{
+			if (v.size() != col())
+				throw "Exception: adding rows with different dimensions";
+			e.emplace_back(v);
+			return *this;
+		}
+
+		// add cols
+		matrix & add_col(const vector<T> &v)
+		{
+			if (v.size() != row())
+				throw "Exception: adding cols with different dimensions";
+			for (size_t i = 0; i < v.size(); i++)
+				e[i].emplace_back(v[i]);
+			return *this;
+		}
+
 		// accessor
 		T & get(size_t r, size_t c) {return e[r][c];}
 		const T & get(size_t r, size_t c) const {return e[r][c];}
@@ -139,8 +186,8 @@ class matrix
 				for (size_t i = 0; i < row(); i++)
 					if (i != leading)
 					{
-						auto tmp = row(leading).copy();
-						row(i) -= e[i][j] * vector<T>(tmp);
+						auto result = e[i][j] * row(leading);
+						row(i) -= vector<T>(result);
 					}
 				leading++;
 			}
@@ -149,6 +196,30 @@ class matrix
 
 		// get the reduced form of the matrix
 		matrix ref(size_t aug = 0) const {return matrix(*this).reduce_to_ref(aug);}
+
+		// determinant
+		// use the naive method
+		T det() const
+		{
+			if (row() != col())
+				throw "Exception: determinant of non-square matrix";
+			if (row() == 1)
+				return e[0][0];
+
+			T result = static_cast<T>(0);
+			for (size_t j = 0; j < col(); j++)
+			{
+				matrix A(row()-1, 0);
+				for (size_t i = 0; i < A.row(); i++)
+				{
+					A.e[i].reserve(col() - 1);
+					A.e[i].insert(A.e[i].end(), e[i+1].begin(), e[i+1].begin() + j);
+					A.e[i].insert(A.e[i].end(), e[i+1].begin() + j + 1, e[i+1].end());
+				}
+				result += (j%2==0 ? e[0][j] : -e[0][j]) * A.det();
+			}
+			return result;
+		}
 
 	private:
 		std::vector<std::vector<T>> e;
