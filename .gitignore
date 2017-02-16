@@ -1,8 +1,30 @@
-# C/C++ object files
+# Compiled Object files
+*.slo
+*.lo
 *.o
+*.obj
 
-# C/C++ precompiled header
-*.h.gch
+# Precompiled Headers
+*.gch
+*.pch
 
-# final executable
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
 matrix
+*.exe
+*.out
+*.app
