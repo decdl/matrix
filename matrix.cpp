@@ -1,5 +1,5 @@
 
-#include "precompile.h"
+#include "prec.h"
 
 int main()
 {
