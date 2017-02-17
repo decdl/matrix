@@ -11,7 +11,7 @@ matrix: matrix.o
 matrix.o: matrix.cpp prec.h.gch
 	$(CXX) $(CXX_FLAGS) matrix.cpp -o matrix.o
 
-prec.h.gch: prec.h vector.h matrix.h frac.h
+prec.h.gch: prec.h Vector.h Matrix.h Frac.h
 	$(CXX) $(CXX_FLAGS) prec.h -o prec.h.gch
 
 clean:

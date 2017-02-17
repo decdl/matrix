@@ -3,9 +3,9 @@
 #define _PRECOMPILE_H_
 
 #include <iostream>
-#include "vector.h"
-#include "matrix.h"
-#include "frac.h"
+#include "Vector.h"
+#include "Matrix.h"
+#include "Frac.h"
 
 #endif
 

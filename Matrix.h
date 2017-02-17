@@ -7,26 +7,26 @@
 #include <ostream>
 #include <sstream>
 #include <vector>
-#include "vector.h"
+#include "Vector.h"
 
 template<typename T>
-class matrix
+class Matrix
 {
 	public:
 		// constructors
-		matrix() {}
-		matrix(size_t num_row, size_t num_col) : e(num_row, std::vector<T>(num_col)) {}
-		matrix(const matrix &A) : e(A.e) {}
-		matrix(matrix &&A) : e(A.e) {}
+		Matrix() {}
+		Matrix(size_t num_row, size_t num_col) : e(num_row, std::vector<T>(num_col)) {}
+		Matrix(const Matrix &A) : e(A.e) {}
+		Matrix(Matrix &&A) : e(A.e) {}
 
 		// assign operators
-		matrix & operator=(const matrix &A) {e = A.e; return *this;}
+		Matrix & operator=(const Matrix &A) {e = A.e; return *this;}
 
 		// clear
-		matrix & clear() {e.clear(); return *this;}
+		Matrix & clear() {e.clear(); return *this;}
 
 		// resize
-		matrix & resize(size_t r, size_t c)
+		Matrix & resize(size_t r, size_t c)
 		{
 			e.resize(r);
 			for (std::vector<T> &v : e)
@@ -35,12 +35,12 @@ class matrix
 		}
 
 		// reserve
-		matrix & reserve_row(size_t r)
+		Matrix & reserve_row(size_t r)
 		{
 			e.reserve(r);
 			return *this;
 		}
-		matrix & reserve_col(size_t c)
+		Matrix & reserve_col(size_t c)
 		{
 			for (std::vector<T> &v : e)
 				v.reserve(c);
@@ -48,7 +48,7 @@ class matrix
 		}
 
 		// add rows
-		matrix & add_row(const vector<T> &v)
+		Matrix & add_row(const Vector<T> &v)
 		{
 			if (v.size() != col())
 				throw L"Exception: adding rows with different dimensions";
@@ -57,7 +57,7 @@ class matrix
 		}
 
 		// add cols
-		matrix & add_col(const vector<T> &v)
+		Matrix & add_col(const Vector<T> &v)
 		{
 			if (v.size() != row())
 				throw L"Exception: adding cols with different dimensions";
@@ -71,18 +71,18 @@ class matrix
 		const T & get(size_t r, size_t c) const {return e[r][c];}
 
 		// access const rows
-		vector<T const> row(size_t r) const
+		Vector<T const> row(size_t r) const
 		{
-			vector<T const> v;
+			Vector<T const> v;
 			for (const T &c : e[r])
 				v.push_back(c);
 			return v;
 		}
 
 		// access rows
-		vector<T> row(size_t r)
+		Vector<T> row(size_t r)
 		{
-			vector<T> v;
+			Vector<T> v;
 			for (T &c : e[r])
 				v.push_back(c);
 			return v;
@@ -92,18 +92,18 @@ class matrix
 		size_t row() const {return e.size();}
 
 		// access const cols
-		vector<T const> col(size_t c) const
+		Vector<T const> col(size_t c) const
 		{
-			vector<T const> v;
+			Vector<T const> v;
 			for (const std::vector<T> &row : e)
 				v.push_back(e[c]);
 			return v;
 		}
 
 		// access cols
-		vector<T> col(size_t c)
+		Vector<T> col(size_t c)
 		{
-			vector<T> v;
+			Vector<T> v;
 			for (std::vector<T> &row : e)
 				v.push_back(e[c]);
 			return v;
@@ -114,7 +114,7 @@ class matrix
 
 		// input
 		template<typename Char>
-		friend std::basic_istream<Char> & operator>>(std::basic_istream<Char> &is, matrix &A)
+		friend std::basic_istream<Char> & operator>>(std::basic_istream<Char> &is, Matrix &A)
 		{
 			A.e.clear();
 			std::basic_string<Char> row;
@@ -145,7 +145,7 @@ class matrix
 
 		// output
 		template<typename Char>
-		friend std::basic_ostream<Char> & operator<<(std::basic_ostream<Char> &os, const matrix &A)
+		friend std::basic_ostream<Char> & operator<<(std::basic_ostream<Char> &os, const Matrix &A)
 		{
 			for (const std::vector<T> &v : A.e)
 			{
@@ -164,7 +164,7 @@ class matrix
 		}
 
 		// line reduce into REF
-		matrix & reduce_to_ref(size_t aug = 0)
+		Matrix & reduce_to_ref(size_t aug = 0)
 		{
 			size_t leading = 0;
 			for (size_t j = 0; leading < row() && j < col() - aug; j++)
@@ -187,22 +187,22 @@ class matrix
 					if (i != leading)
 					{
 						auto result = e[i][j] * row(leading);
-						row(i) -= vector<T>(result);
+						row(i) -= Vector<T>(result);
 					}
 				leading++;
 			}
 			return *this;
 		}
 
-		// get the reduced form of the matrix
-		matrix ref(size_t aug = 0) const {return matrix(*this).reduce_to_ref(aug);}
+		// get the reduced form of the Matrix
+		Matrix ref(size_t aug = 0) const {return Matrix(*this).reduce_to_ref(aug);}
 
 		// determinant
 		// use the naive method
 		T det() const
 		{
 			if (row() != col())
-				throw L"Exception: determinant of non-square matrix";
+				throw L"Exception: determinant of non-square Matrix";
 			if (row() == 1)
 				return e[0][0];
 
@@ -210,7 +210,7 @@ class matrix
 			for (size_t j = 0; j < col(); j++)
 			{
 				// calculate cofactor
-				matrix A(row()-1, 0);
+				Matrix A(row()-1, 0);
 				for (size_t i = 0; i < A.row(); i++)
 				{
 					A.e[i].reserve(col() - 1);

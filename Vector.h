@@ -7,7 +7,7 @@
 #include <utility>
 
 template<typename T>
-class vector : private std::vector<T*>
+class Vector : private std::vector<T*>
 {
 	public:
 
@@ -112,50 +112,50 @@ class vector : private std::vector<T*>
 
 			private:
 				base_iterator iter;
-				friend vector;
+				friend Vector;
 		};
 		typedef _iter<true> const_iterator;
 		typedef _iter<false> iterator;
 
 		// default constructor
-		inline vector() {}
+		inline Vector() {}
 
 		// copy-constructor with rvlaue
-		inline vector(vector &&v) : std::vector<T*>(v) {}
+		inline Vector(Vector &&v) : std::vector<T*>(v) {}
 
 		// copy-constructor with lvalue
-		inline vector(const vector &v) : std::vector<T*>(v) {}
+		inline Vector(const Vector &v) : std::vector<T*>(v) {}
 
 		// construct from a std::vector
-		inline vector(std::vector<T> &v)
+		inline Vector(std::vector<T> &v)
 		{
 			for (T &e : v)
 				push_back(e);
 		}
 
 		// adding const components
-		inline vector & push_back(const T &c)
+		inline Vector & push_back(const T &c)
 		{
 			std::vector<T*>::push_back(&c);
 			return *this;
 		}
 
 		// adding components
-		inline vector & push_back(T &c)
+		inline Vector & push_back(T &c)
 		{
 			std::vector<T*>::push_back(&c);
 			return *this;
 		}
 
 		// copy-assign operator with rvalue
-		inline vector & operator=(vector &&v)
+		inline Vector & operator=(Vector &&v)
 		{
 			std::vector<T*>::operator=(v);
 			return *this;
 		}
 
 		// copy-assign operator with lvalue
-		inline vector & operator=(const vector &v)
+		inline Vector & operator=(const Vector &v)
 		{
 			std::vector<T*>::operator=(v);
 			return *this;
@@ -214,7 +214,7 @@ class vector : private std::vector<T*>
 
 		// compound divided by a scalar
 		template<typename scalar>
-		inline vector & operator/=(scalar c)
+		inline Vector & operator/=(scalar c)
 		{
 			for (T &e : *this)
 				e /= c;
@@ -226,13 +226,13 @@ class vector : private std::vector<T*>
 		inline std::vector<T> operator/(scalar c) const
 		{
 			std::vector<T> result(begin(), end());
-			vector(result) /= c;
+			Vector(result) /= c;
 			return result;
 		}
 
 		// compound multipling a scalar
 		template<typename scalar>
-		inline vector & operator*=(scalar c)
+		inline Vector & operator*=(scalar c)
 		{
 			for (T &e : *this)
 				e *= c;
@@ -244,24 +244,24 @@ class vector : private std::vector<T*>
 		inline std::vector<T> operator*(scalar c) const
 		{
 			std::vector<T> result(begin(), end());
-			vector(result) *= c;
+			Vector(result) *= c;
 			return result;
 		}
 
 		// multiplied by a scalar
 		template<typename scalar>
-		friend inline std::vector<T> operator*(scalar c, const vector &v)
+		friend inline std::vector<T> operator*(scalar c, const Vector &v)
 		{
 			std::vector<T> result(v.begin(), v.end());
-			vector(result) *= c;
+			Vector(result) *= c;
 			return result;
 		}
 
-		// compound adding a vector
-		inline vector & operator+=(const vector &rhs)
+		// compound adding a Vector
+		inline Vector & operator+=(const Vector &rhs)
 		{
 			if (size() != rhs.size())
-				throw L"Exception: vector adding with different dimensions";
+				throw L"Exception: Vector adding with different dimensions";
 			iterator it0 = begin();
 			const_iterator it1 = rhs.begin();
 			while (it0 != end())
@@ -269,19 +269,19 @@ class vector : private std::vector<T*>
 			return *this;
 		}
 
-		// adding vectors
-		inline std::vector<T> operator+(const vector &rhs) const
+		// adding Vectors
+		inline std::vector<T> operator+(const Vector &rhs) const
 		{
 			std::vector<T> result(begin(), end());
-			vector(result) += rhs;
+			Vector(result) += rhs;
 			return result;
 		}
 
-		// compound subtracting a vector
-		inline vector & operator-=(const vector &rhs)
+		// compound subtracting a Vector
+		inline Vector & operator-=(const Vector &rhs)
 		{
 			if (size() != rhs.size())
-				throw L"Exception: vector adding with different dimensions";
+				throw L"Exception: Vector adding with different dimensions";
 			iterator it0 = begin();
 			const_iterator it1 = rhs.begin();
 			while (it0 != end())
@@ -289,16 +289,16 @@ class vector : private std::vector<T*>
 			return *this;
 		}
 
-		// subtracting vectors
-		inline std::vector<T> operator-(const vector &rhs) const
+		// subtracting Vectors
+		inline std::vector<T> operator-(const Vector &rhs) const
 		{
 			std::vector<T> result(begin(), end());
-			vector(result) -= rhs;
+			Vector(result) -= rhs;
 			return result;
 		}
 
 		// dot product
-		inline T dot(const vector &rhs) const
+		inline T dot(const Vector &rhs) const
 		{
 			if (size() != rhs.size())
 				throw L"Exception: dot product between different dimensions";
