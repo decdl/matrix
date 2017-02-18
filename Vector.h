@@ -117,6 +117,9 @@ class Vector : private std::vector<T*>
 		typedef _iter<true> const_iterator;
 		typedef _iter<false> iterator;
 
+
+		// constructors
+
 		// default constructor
 		inline Vector() {}
 
@@ -132,6 +135,9 @@ class Vector : private std::vector<T*>
 			for (T &e : v)
 				push_back(e);
 		}
+
+
+		// modifiers
 
 		// adding const components
 		inline Vector & push_back(const T &c)
@@ -169,6 +175,9 @@ class Vector : private std::vector<T*>
 				v.emplace_back(x);
 			return v;
 		}
+
+		// cast to std::vector
+		inline operator std::vector<T>() const {return copy();}
 
 		// begin
 		inline iterator begin()
