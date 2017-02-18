@@ -19,12 +19,12 @@ class Frac
 	public:
 		const T &num, &den;
 		const bool &neg;
-		Frac(T numerator = 0, bool negative = false, T denominator = 1) : s(negative), n(numerator), d(denominator), num(n), den(d), neg(s) {standarize();}
+		Frac(T numerator = 0, T denominator = 1, bool negative = false) : s(negative), n(numerator), d(denominator), num(n), den(d), neg(s) {standarize();}
 		Frac(const Frac &rhs) : s(rhs.s), n(rhs.n), d(rhs.d), num(n), den(d), neg(s) {}
 		inline Frac & operator=(const Frac &rhs);
 		operator double() const {return s ? - static_cast<double>(n) / static_cast<double>(d) : static_cast<double>(n) / static_cast<double>(d);}
-		Frac operator-() const {return Frac(n, !neg, d);}
-		Frac inverse() const {return Frac(d, neg, n);}
+		Frac operator-() const {return Frac(n, d, !neg);}
+		Frac inverse() const {return Frac(d, n, neg);}
 		inline Frac & operator+=(const Frac &rhs);
 		inline Frac & operator-=(const Frac &rhs);
 		inline Frac & operator*=(const Frac &rhs);
@@ -43,7 +43,7 @@ template<typename T>
 inline void Frac<T>::standarize()
 {
 	if (d == 0)
-		throw "Denominator is 0";
+		throw L"Denominator is 0";
 	T c = gcd(n, d);
 	n /= c;
 	d /= c;
@@ -66,8 +66,9 @@ Frac<T> operator+(const Frac<T> &lhs, const Frac<T> &rhs)
 	if (rhs.neg)
 		return lhs - -rhs;
 	return Frac<T>(
-			lhs.num * rhs.den + rhs.num * lhs.den, false,
-			lhs.den * rhs.den);
+			lhs.num * rhs.den + rhs.num * lhs.den,
+			lhs.den * rhs.den,
+			false);
 }
 
 template<typename T>
@@ -80,8 +81,8 @@ Frac<T> operator-(const Frac<T> &lhs, const Frac<T> &rhs)
 	bool negative = lhs.num * rhs.den < rhs.num * lhs.den;
 	return Frac<T>(
 			negative ? rhs.num * lhs.den - lhs.num * rhs.den : lhs.num * rhs.den - rhs.num * lhs.den,
-			negative,
-			lhs.den * rhs.den);
+			lhs.den * rhs.den,
+			negative);
 }
 
 template<typename T>
@@ -89,8 +90,8 @@ Frac<T> operator*(const Frac<T> &lhs, const Frac<T> &rhs)
 {
 	return Frac<T>(
 			lhs.num * rhs.num,
-			!lhs.neg == rhs.neg,
-			lhs.den * rhs.den);
+			lhs.den * rhs.den,
+			! lhs.neg == rhs.neg);
 }
 
 template<typename T>
@@ -156,7 +157,7 @@ inline InputStream & operator>>(InputStream &is, Frac<T> &f)
 		iss.str(s.substr(slash_pos + 1));
 		iss >> den;
 	}
-	f = Frac<T>(num, neg, den);
+	f = Frac<T>(num, den, neg);
 	return is;
 }
 
