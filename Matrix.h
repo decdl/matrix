@@ -13,6 +13,9 @@
 template<typename T>
 class Matrix
 {
+	private:
+		std::vector<std::vector<T>> e;
+
 	public:
 		// constructors
 		Matrix() {}
@@ -130,8 +133,13 @@ class Matrix
 				for (count = 0; !iss.eof(); count++)
 				{
 					T entry;
-					iss >> entry;
-					A.e.back().push_back(std::move(entry));
+					if (iss >> entry)
+						A.e.back().push_back(std::move(entry));
+					else
+					{
+						is.clear(std::ios::failbit);
+						return is;
+					}
 				}
 				if (cols == 0)
 					cols = count;
@@ -219,9 +227,6 @@ class Matrix
 			}
 			return result;
 		}
-
-	private:
-		std::vector<std::vector<T>> e;
 };
 
 #endif

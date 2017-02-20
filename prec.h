@@ -3,7 +3,8 @@
 #define _PRECOMPILE_H_
 
 #include <iostream>
-#include <exception>
+#include <stdexcept>
+#include <string>
 #include "Vector.h"
 #include "Matrix.h"
 #include "Frac.h"

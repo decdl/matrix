@@ -140,9 +140,10 @@ template<typename Char, typename T>
 inline std::basic_istream<Char> & operator>>(std::basic_istream<Char> &is, Frac<T> &f)
 {
 	std::basic_string<Char> s;
+	if (!(is >> s))
+		return is;
 	T num, den = 1;
 	bool neg = false;
-	is >> s;
 	if (s[0] == static_cast<Char>('-'))
 	{
 		neg = true;
@@ -151,12 +152,20 @@ inline std::basic_istream<Char> & operator>>(std::basic_istream<Char> &is, Frac<
 	size_t slash_pos = s.find_first_of(static_cast<Char>('/'));
 	std::basic_istringstream<Char> iss;
 	iss.str(s.substr(0, slash_pos));
-	iss >> num;
+	if (!(iss >> num))
+	{
+		is.clear(std::ios::failbit);
+		return is;
+	}
 	if (slash_pos != std::basic_string<Char>::npos)
 	{
 		iss.seekg(std::ios::beg);
 		iss.str(s.substr(slash_pos + 1));
-		iss >> den;
+		if (!(iss >> den))
+		{
+			is.clear(std::ios::failbit);
+			return is;
+		}
 	}
 	f = Frac<T>(num, den, neg);
 	return is;
