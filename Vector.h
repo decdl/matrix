@@ -2,6 +2,7 @@
 #ifndef _VECTOR_H_
 #define _VECTOR_H_
 
+#include <stdexcept>
 #include <vector>
 #include <cstddef>
 #include <utility>
@@ -284,7 +285,7 @@ class Vector : private std::vector<T*>
 		inline Vector & operator+=(const Vector &rhs)
 		{
 			if (size() != rhs.size())
-				throw L"Exception: Vector adding with different dimensions";
+				throw std::invalid_argument("Vector addition with different dimensions");
 			iterator it0 = begin();
 			const_iterator it1 = rhs.begin();
 			while (it0 != end())
@@ -302,7 +303,7 @@ class Vector : private std::vector<T*>
 		inline Vector & operator-=(const Vector &rhs)
 		{
 			if (size() != rhs.size())
-				throw L"Exception: Vector adding with different dimensions";
+				throw std::invalid_argument("Vector subtraction with different dimensions");
 			iterator it0 = begin();
 			const_iterator it1 = rhs.begin();
 			while (it0 != end())
@@ -320,7 +321,7 @@ class Vector : private std::vector<T*>
 		inline T dot(const Vector &rhs) const
 		{
 			if (size() != rhs.size())
-				throw L"Exception: dot product between different dimensions";
+				throw std::invalid_argument("dot product between different dimensions");
 			T result = static_cast<T>(0);
 			const_iterator it0 = begin(),
 						   it1 = rhs.begin();

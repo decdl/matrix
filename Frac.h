@@ -2,6 +2,7 @@
 #ifndef _FRAC_H_
 #define _FRAC_H_
 
+#include <stdexcept>
 #include <cstdint>
 #include <istream>
 #include <ostream>
@@ -43,7 +44,7 @@ template<typename T>
 inline void Frac<T>::standarize()
 {
 	if (d == 0)
-		throw L"Denominator is 0";
+		throw std::invalid_argument("Denominator is 0");
 	T c = gcd(n, d);
 	n /= c;
 	d /= c;
@@ -124,34 +125,34 @@ inline Frac<T> & Frac<T>::operator/=(const Frac<T> &rhs)
 	return *this = *this / rhs;
 }
 
-template<typename OutputStream, typename T>
-inline OutputStream & operator<<(OutputStream &os, const Frac<T> &f)
+template<typename Char, typename T>
+inline std::basic_ostream<Char> & operator<<(std::basic_ostream<Char> &os, const Frac<T> &f)
 {
 	if (f.neg && f.num != 0)
-		os << '-';
+		os << static_cast<Char>('-');
 	os << f.num;
 	if (f.den != 1)
-		os << '/' << f.den;
+		os << static_cast<Char>('/') << f.den;
 	return os;
 }
 
-template<typename InputStream, typename T>
-inline InputStream & operator>>(InputStream &is, Frac<T> &f)
+template<typename Char, typename T>
+inline std::basic_istream<Char> & operator>>(std::basic_istream<Char> &is, Frac<T> &f)
 {
-	std::wstring s;
+	std::basic_string<Char> s;
 	T num, den = 1;
 	bool neg = false;
 	is >> s;
-	if (s[0] == L'-')
+	if (s[0] == static_cast<Char>('-'))
 	{
 		neg = true;
 		s = s.substr(1);
 	}
-	size_t slash_pos = s.find_first_of(L'/');
-	std::wistringstream iss;
+	size_t slash_pos = s.find_first_of(static_cast<Char>('/'));
+	std::basic_istringstream<Char> iss;
 	iss.str(s.substr(0, slash_pos));
 	iss >> num;
-	if (slash_pos != std::wstring::npos)
+	if (slash_pos != std::basic_string<Char>::npos)
 	{
 		iss.seekg(std::ios::beg);
 		iss.str(s.substr(slash_pos + 1));

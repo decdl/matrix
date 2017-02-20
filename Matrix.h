@@ -2,6 +2,7 @@
 #ifndef _MATRIX_H_
 #define _MATRIX_H_
 
+#include <stdexcept>
 #include <string>
 #include <istream>
 #include <ostream>
@@ -51,7 +52,7 @@ class Matrix
 		Matrix & add_row(const Vector<T> &v)
 		{
 			if (v.size() != col())
-				throw L"Exception: adding rows with different dimensions";
+				throw std::invalid_argument("adding rows with different dimensions");
 			e.emplace_back(v);
 			return *this;
 		}
@@ -60,7 +61,7 @@ class Matrix
 		Matrix & add_col(const Vector<T> &v)
 		{
 			if (v.size() != row())
-				throw L"Exception: adding cols with different dimensions";
+				throw std::invalid_argument("adding cols with different dimensions");
 			for (size_t i = 0; i < v.size(); i++)
 				e[i].emplace_back(v[i]);
 			return *this;
@@ -185,10 +186,7 @@ class Matrix
 				row(leading) /= e[leading][j];
 				for (size_t i = 0; i < row(); i++)
 					if (i != leading)
-					{
-						auto result = e[i][j] * row(leading);
-						row(i) -= Vector<T>(result);
-					}
+						row(i) -= e[i][j] * row(leading);
 				leading++;
 			}
 			return *this;
@@ -202,7 +200,7 @@ class Matrix
 		T det() const
 		{
 			if (row() != col())
-				throw L"Exception: determinant of non-square Matrix";
+				throw std::invalid_argument("determinant of non-square Matrix");
 			if (row() == 1)
 				return e[0][0];
 

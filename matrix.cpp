@@ -6,13 +6,13 @@ int main()
 	try
 	{
 		Matrix<Frac<uint64_t>> A;
-		std::wcin >> A;
-		std::wcout << A.ref() << std::endl;
-		std::wcout << A.det() << std::endl;
+		std::cin >> A;
+		std::cout << A.ref() << std::endl;
+		std::cout << A.det() << std::endl;
 	}
-	catch (const wchar_t *error)
+	catch (const std::exception &error)
 	{
-		std::wcerr << error << std::endl;
+		std::cerr << "\e[31mException: " << error.what() << "\e[0m" << std::endl;
 	}
 	return 0;
 }
