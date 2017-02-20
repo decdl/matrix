@@ -1,6 +1,6 @@
 
-#ifndef _VECTOR_ROW_
-#define _VECTOR_ROW_
+#ifndef _VECTOR_H_
+#define _VECTOR_H_
 
 #include <vector>
 #include <cstddef>
@@ -9,14 +9,25 @@
 template<typename T>
 class Vector : private std::vector<T*>
 {
+	private:
+		class copy_tag{};
+		std::vector<T> data;
+		inline void construct_self()
+		{
+			for (T &e : data)
+				push_back(e);
+		}
+		inline Vector(const Vector &rhs, copy_tag) : data(rhs) {construct_self();}
+		friend std::vector<T*> & std::vector<T*>::operator=(const std::vector<T*> &);
 	public:
-
 		// iterator and const_iterator definition
 		template<bool citer>
 		class _iter
 		{
 			private:
 				typedef typename std::conditional<citer, typename std::vector<T*>::const_iterator, typename std::vector<T*>::iterator>::type base_iterator;
+				base_iterator iter;
+				friend Vector;
 			public:
 				
 				// basic member types
@@ -109,10 +120,6 @@ class Vector : private std::vector<T*>
 
 				// offset dereferencing
 				inline T operator[](const difference_type &offset) {return *iter[offset];}
-
-			private:
-				base_iterator iter;
-				friend Vector;
 		};
 		typedef _iter<true> const_iterator;
 		typedef _iter<false> iterator;
@@ -124,10 +131,27 @@ class Vector : private std::vector<T*>
 		inline Vector() {}
 
 		// copy-constructor with rvlaue
-		inline Vector(Vector &&v) : std::vector<T*>(v) {}
+		inline Vector(Vector &&v) : data(v.data)
+		{
+			if (own_data())
+			{
+				v.clear();
+				for (T &e : data)
+					push_back(e);
+			}
+			else
+				std::vector<T*>::operator=(v);
+		}
 
 		// copy-constructor with lvalue
-		inline Vector(const Vector &v) : std::vector<T*>(v) {}
+		inline Vector(const Vector &v) : data(v.data)
+		{
+			if (own_data())
+				for (T &e : data)
+					push_back(e);
+			else
+				std::vector<T*>::operator=(v);
+		}
 
 		// construct from a std::vector
 		inline Vector(std::vector<T> &v)
@@ -138,13 +162,6 @@ class Vector : private std::vector<T*>
 
 
 		// modifiers
-
-		// adding const components
-		inline Vector & push_back(const T &c)
-		{
-			std::vector<T*>::push_back(&c);
-			return *this;
-		}
 
 		// adding components
 		inline Vector & push_back(T &c)
@@ -168,16 +185,19 @@ class Vector : private std::vector<T*>
 		}
 
 		// return a copy of underlying data
-		inline std::vector<T> copy() const
+		inline Vector copy() const
 		{
-			std::vector<T> v;
-			for (T &x : *this)
-				v.emplace_back(x);
-			return v;
+			return Vector(*this, copy_tag());
 		}
 
-		// cast to std::vector
-		inline operator std::vector<T>() const {return copy();}
+		// check if owns data
+		inline bool own_data() {return !data.empty();}
+
+		// cast into std::vector
+		inline operator std::vector<T>() const
+		{
+			return std::vector<T>(begin(), end());
+		}
 
 		// begin
 		inline iterator begin()
@@ -232,11 +252,9 @@ class Vector : private std::vector<T*>
 
 		// divided by a scalar
 		template<typename scalar>
-		inline std::vector<T> operator/(scalar c) const
+		inline Vector operator/(scalar c) const
 		{
-			std::vector<T> result(begin(), end());
-			Vector(result) /= c;
-			return result;
+			return this->copy() /= c;
 		}
 
 		// compound multipling a scalar
@@ -250,20 +268,16 @@ class Vector : private std::vector<T*>
 
 		// multipling a scalar
 		template<typename scalar>
-		inline std::vector<T> operator*(scalar c) const
+		inline Vector operator*(scalar c) const
 		{
-			std::vector<T> result(begin(), end());
-			Vector(result) *= c;
-			return result;
+			return this->copy() *= c;
 		}
 
 		// multiplied by a scalar
 		template<typename scalar>
-		friend inline std::vector<T> operator*(scalar c, const Vector &v)
+		friend inline Vector operator*(scalar c, const Vector &v)
 		{
-			std::vector<T> result(v.begin(), v.end());
-			Vector(result) *= c;
-			return result;
+			return v * c;
 		}
 
 		// compound adding a Vector
@@ -279,11 +293,9 @@ class Vector : private std::vector<T*>
 		}
 
 		// adding Vectors
-		inline std::vector<T> operator+(const Vector &rhs) const
+		inline Vector operator+(const Vector &rhs) const
 		{
-			std::vector<T> result(begin(), end());
-			Vector(result) += rhs;
-			return result;
+			return this->copy() += rhs;
 		}
 
 		// compound subtracting a Vector
@@ -299,11 +311,9 @@ class Vector : private std::vector<T*>
 		}
 
 		// subtracting Vectors
-		inline std::vector<T> operator-(const Vector &rhs) const
+		inline Vector operator-(const Vector &rhs) const
 		{
-			std::vector<T> result(begin(), end());
-			Vector(result) -= rhs;
-			return result;
+			return this->copy() -= rhs;
 		}
 
 		// dot product
