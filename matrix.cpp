@@ -2,16 +2,9 @@
 #include "prec.h"
 
 const char unknow_msg[] = "Unknown command: ";
-const char * help_msg[] = {
-	"Matrix calculator by decdl",
-	"Commands:",
-	"	\e[1mhelp\e[0m:	show this message",
-	"	\e[1mexit\e[0m:	quit the program",
-	"	\e[1mref\e[0m:	reduce matrix to reduced echelon form",
-	"	\e[1mdet\e[0m:	calculate determinant"
-};
-
 class continue_signal {};
+
+typedef Matrix<Frac<unsigned int>> matrix_t;
 
 [[noreturn]] inline void bad_input() {throw std::ios::failure("invalid input");}
 
@@ -32,35 +25,61 @@ inline void unknown(const std::string &cmd)
 	throw continue_signal();
 }
 
-inline void help()
-{
-	for (const char *msg : help_msg)
-		std::cout << msg << std::endl;
-	throw continue_signal();
-}
+const char * help_msg[] = {
+	"Matrix calculator by decdl",
+	"Commands:",
+	"	\e[1mhelp\e[0m:	show this message",
+	"	\e[1mexit\e[0m:	quit the program",
+	"	\e[1mref\e[0m:	reduce matrix to reduced echelon form",
+	"	\e[1mdet\e[0m:	calculate determinant",
+	"	\e[1mmul\e[0m:	matrix multiplication"
+};
 
-inline void ref()
+const struct
 {
-	Matrix<Frac<unsigned int>> A;
-	std::cin >> A;
-	if (!std::cin)
-		bad_input();
-	std::cout << A.ref() << std::endl;
-	throw continue_signal();
-}
+	std::string name;
+	void (*function)();
+} commands[] = {
+	
+	{"help", []()
+		{
+			for (const char *msg : help_msg)
+				std::cout << msg << std::endl;
+			throw continue_signal();
+		}
+	},
 
-inline void det()
-{
-	Matrix<Frac<unsigned int>> A;
-	std::cin >> A;
-	if (!std::cin)
-		bad_input();
-	std::cout << A.det() << std::endl;
-	throw continue_signal();
-}
+	{"ref", []()
+		{
+			matrix_t A;
+			std::cin >> A;
+			std::cout << A.ref() << std::endl;
+			throw continue_signal();
+		}
+	},
+
+	{"det", []()
+		{
+			matrix_t A;
+			std::cin >> A;
+			std::cout << A.det() << std::endl;
+			throw continue_signal();
+		}
+	},
+
+	{"mul", []()
+		{
+			matrix_t A, B;
+			std::cin >> A >> B;
+			std::cout << A*B << std::endl;
+			throw continue_signal();
+		}
+	}
+};
 
 int main()
 {
+	std::cin.exceptions(std::ios::failbit);
 	std::string cmd;
 	while (true)
 	{
@@ -68,12 +87,9 @@ int main()
 		{
 			if (prompt(cmd))
 				return 0;
-			if (cmd == "help")
-				help();
-			if (cmd == "ref")
-				ref();
-			if (cmd == "det")
-				det();
+			for (const decltype(commands[0]) &command : commands)
+				if (cmd == command.name)
+					command.function();
 			unknown(cmd);
 		}
 		catch (const std::invalid_argument &e)
