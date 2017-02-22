@@ -227,6 +227,19 @@ class Matrix
 			}
 			return result;
 		}
+
+		// matrix multiplication
+		inline Matrix operator/(const Matrix &A) const
+		{
+			if (col() != A.row())
+				throw std::invalid_argument("matrix multiplication with incompatible dimensions");
+			Matrix result(row(), A.col());
+			for (size_t i = 0; i < row(); i++)
+				for (size_t j = 0; j < A.col(); j++)
+					result[i][j] = row(i).dot(A.col(j));
+			return result;
+		}
+
 };
 
 #endif
