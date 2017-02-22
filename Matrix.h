@@ -21,10 +21,11 @@ class Matrix
 		inline Matrix() {}
 		inline Matrix(size_t num_row, size_t num_col) : e(num_row, std::vector<T>(num_col)) {}
 		inline Matrix(const Matrix &A) : e(A.e) {}
-		inline Matrix(Matrix &&A) : e(A.e) {}
+		inline Matrix(Matrix &&A) : e(std::forward(A.e)) {}
 
 		// assign operators
 		inline Matrix & operator=(const Matrix &A) {e = A.e; return *this;}
+		inline Matrix & operator=(Matrix &&A) {e = std::forward(A.e); return *this;}
 
 		// clear
 		inline Matrix & clear() {e.clear(); return *this;}

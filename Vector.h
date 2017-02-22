@@ -42,19 +42,19 @@ class Vector : private std::vector<T*>
 				inline _iter() : iter() {}
 				
 				// copy constructor with rvalue
-				inline _iter(_iter &&rhs) : iter(rhs.iter) {}
+				inline _iter(_iter &&rhs) : iter(std::forward<base_iterator>(rhs.iter)) {}
 
 				// copy constructor with lvalue
 				inline _iter(const _iter &rhs) : iter(rhs.iter) {}
 
 				// constructor with rvalue base_iterator
-				inline _iter(base_iterator &&rhs) : iter(rhs) {}
+				inline _iter(base_iterator &&rhs) : iter(std::forward<base_iterator>(rhs)) {}
 
 				// constructor with lvalue base_iterator
 				inline _iter(base_iterator &rhs) : iter(rhs) {}
 
 				// copy assign operator with rvalue
-				inline _iter & operator=(_iter &&rhs) {iter = rhs.iter; return *this;}
+				inline _iter & operator=(_iter &&rhs) {iter = std::forward(rhs.iter); return *this;}
 
 				// copy assign operator with lvalue
 				inline _iter & operator=(const _iter &rhs) {iter = rhs.iter; return *this;}
@@ -132,7 +132,7 @@ class Vector : private std::vector<T*>
 		inline Vector() {}
 
 		// copy-constructor with rvlaue
-		inline Vector(Vector &&v) : data(v.data)
+		inline Vector(Vector &&v) : data(std::forward<std::vector<T>>(v.data))
 		{
 			if (own_data())
 			{
@@ -141,7 +141,7 @@ class Vector : private std::vector<T*>
 					push_back(e);
 			}
 			else
-				std::vector<T*>::operator=(v);
+				std::vector<T*>::operator=(std::forward<Vector>(v));
 		}
 
 		// copy-constructor with lvalue
@@ -174,7 +174,7 @@ class Vector : private std::vector<T*>
 		// copy-assign operator with rvalue
 		inline Vector & operator=(Vector &&v)
 		{
-			std::vector<T*>::operator=(v);
+			std::vector<T*>::operator=(std::forward(v));
 			return *this;
 		}
 
