@@ -7,10 +7,11 @@
 #include <cstddef>
 #include <utility>
 
-template<typename T>
-class Vector : private std::vector<T*>
+template<typename T, bool C = false>
+class Vector : private std::vector<typename std::conditional<C, const T *, T *>::type>
 {
 	private:
+		typedef typename std::conditional<C, const T, T>::type T_CV;
 		class copy_tag{};
 		std::vector<T> data;
 		inline void construct_self()
@@ -19,23 +20,23 @@ class Vector : private std::vector<T*>
 				push_back(e);
 		}
 		inline Vector(const Vector &rhs, copy_tag) : data(rhs) {construct_self();}
-		friend std::vector<T*> & std::vector<T*>::operator=(const std::vector<T*> &);
+		friend std::vector<T_CV*> & std::vector<T_CV*>::operator=(const std::vector<T_CV*> &);
 	public:
 		// iterator and const_iterator definition
 		template<bool citer>
 		class _iter
 		{
 			private:
-				typedef typename std::conditional<citer, typename std::vector<T*>::const_iterator, typename std::vector<T*>::iterator>::type base_iterator;
+				typedef typename std::conditional<citer, typename std::vector<T_CV*>::const_iterator, typename std::vector<T_CV*>::iterator>::type base_iterator;
 				base_iterator iter;
 				friend Vector;
 			public:
 				
 				// basic member types
-				typedef T value_type;
+				typedef T_CV value_type;
 				typedef typename base_iterator::difference_type difference_type;
 				typedef T* pointer;
-				typedef T &reference;
+				typedef T_CV &reference;
 				typedef std::random_access_iterator_tag iterator_category;
 
 				// default constructor
@@ -66,13 +67,13 @@ class Vector : private std::vector<T*>
 				inline bool operator!=(const _iter &rhs) const {return iter != rhs.iter;}
 
 				// const dereferencing
-				inline const T operator*() const {return **iter;}
+				inline const T_CV operator*() const {return **iter;}
 
 				// dereferencing
-				inline T & operator*() {return **iter;}
+				inline T_CV & operator*() {return **iter;}
 
 				// member access
-				inline T * operator->() const {return *iter;}
+				inline T_CV * operator->() const {return *iter;}
 
 				// pre-increament
 				inline _iter & operator++() {++iter; return *this;}
@@ -117,10 +118,10 @@ class Vector : private std::vector<T*>
 				inline bool operator>=(const _iter &rhs) const {return iter >= rhs.iter;}
 
 				// const offset dereferencing
-				inline const T operator[](const difference_type &offset) const {return *iter[offset];}
+				inline const T_CV operator[](const difference_type &offset) const {return *iter[offset];}
 
 				// offset dereferencing
-				inline T operator[](const difference_type &offset) {return *iter[offset];}
+				inline T_CV operator[](const difference_type &offset) {return *iter[offset];}
 		};
 		typedef _iter<true> const_iterator;
 		typedef _iter<false> iterator;
@@ -141,7 +142,7 @@ class Vector : private std::vector<T*>
 					push_back(e);
 			}
 			else
-				std::vector<T*>::operator=(std::forward<Vector>(v));
+				std::vector<T_CV*>::operator=(std::forward<Vector>(v));
 		}
 
 		// copy-constructor with lvalue
@@ -151,37 +152,36 @@ class Vector : private std::vector<T*>
 				for (T &e : data)
 					push_back(e);
 			else
-				std::vector<T*>::operator=(v);
+				std::vector<T_CV*>::operator=(v);
 		}
 
 		// construct from a std::vector
-		inline Vector(std::vector<T> &v)
+		inline Vector(std::vector<T_CV> &v)
 		{
-			for (T &e : v)
+			for (T_CV &e : v)
 				push_back(e);
 		}
-
 
 		// modifiers
 
 		// adding components
-		inline Vector & push_back(T &c)
+		inline Vector & push_back(T_CV &c)
 		{
-			std::vector<T*>::push_back(&c);
+			std::vector<T_CV*>::push_back(&c);
 			return *this;
 		}
 
 		// copy-assign operator with rvalue
 		inline Vector & operator=(Vector &&v)
 		{
-			std::vector<T*>::operator=(std::forward(v));
+			std::vector<T_CV*>::operator=(std::forward(v));
 			return *this;
 		}
 
 		// copy-assign operator with lvalue
 		inline Vector & operator=(const Vector &v)
 		{
-			std::vector<T*>::operator=(v);
+			std::vector<T_CV*>::operator=(v);
 			return *this;
 		}
 
@@ -203,43 +203,43 @@ class Vector : private std::vector<T*>
 		// begin
 		inline iterator begin()
 		{
-			return iterator(std::vector<T*>::begin());
+			return iterator(std::vector<T_CV*>::begin());
 		}
 
 		// end
 		inline iterator end()
 		{
-			return iterator(std::vector<T*>::end());
+			return iterator(std::vector<T_CV*>::end());
 		}
 
 		// const begin
 		inline const_iterator begin() const
 		{
-			return const_iterator(std::vector<T*>::begin());
+			return const_iterator(std::vector<T_CV*>::begin());
 		}
 
 		// const end
 		inline const_iterator end() const
 		{
-			return const_iterator(std::vector<T*>::end());
+			return const_iterator(std::vector<T_CV*>::end());
 		}
 
 		// size
 		size_t size() const
 		{
-			return std::vector<T*>::size();
+			return std::vector<T_CV*>::size();
 		}
 
 		// const offset dereferencing
-		inline const T & operator[](const typename std::vector<T*>::difference_type &n) const
+		inline const T & operator[](const typename std::vector<T_CV*>::difference_type &n) const
 		{
-			return *std::vector<T*>::operator[](n);
+			return *std::vector<T_CV*>::operator[](n);
 		}
 
 		// offset dereferencing
-		inline T & operator[](const typename std::vector<T*>::difference_type &n)
+		inline T & operator[](const typename std::vector<T_CV*>::difference_type &n)
 		{
-			return *std::vector<T*>::operator[](n);
+			return *std::vector<T_CV*>::operator[](n);
 		}
 
 		// compound divided by a scalar

@@ -21,7 +21,7 @@ class Matrix
 		inline Matrix() {}
 		inline Matrix(size_t num_row, size_t num_col) : e(num_row, std::vector<T>(num_col)) {}
 		inline Matrix(const Matrix &A) : e(A.e) {}
-		inline Matrix(Matrix &&A) : e(std::forward(A.e)) {}
+		inline Matrix(Matrix &&A) : e(std::forward<std::vector<std::vector<T>>>(A.e)) {}
 
 		// assign operators
 		inline Matrix & operator=(const Matrix &A) {e = A.e; return *this;}
@@ -76,9 +76,9 @@ class Matrix
 		inline const T & get(size_t r, size_t c) const {return e[r][c];}
 
 		// access const rows
-		inline Vector<T const> row(size_t r) const
+		inline Vector<T, true> row(size_t r) const
 		{
-			Vector<T const> v;
+			Vector<T, true> v;
 			for (const T &c : e[r])
 				v.push_back(c);
 			return v;
@@ -97,11 +97,11 @@ class Matrix
 		inline size_t row() const {return e.size();}
 
 		// access const cols
-		inline Vector<T const> col(size_t c) const
+		inline Vector<T, true> col(size_t c) const
 		{
-			Vector<T const> v;
+			Vector<T, true> v;
 			for (const std::vector<T> &row : e)
-				v.push_back(e[c]);
+				v.push_back(row[c]);
 			return v;
 		}
 
@@ -110,7 +110,7 @@ class Matrix
 		{
 			Vector<T> v;
 			for (std::vector<T> &row : e)
-				v.push_back(e[c]);
+				v.push_back(row[c]);
 			return v;
 		}
 
@@ -230,14 +230,14 @@ class Matrix
 		}
 
 		// matrix multiplication
-		inline Matrix operator/(const Matrix &A) const
+		inline Matrix operator*(const Matrix &A) const
 		{
 			if (col() != A.row())
 				throw std::invalid_argument("matrix multiplication with incompatible dimensions");
 			Matrix result(row(), A.col());
 			for (size_t i = 0; i < row(); i++)
 				for (size_t j = 0; j < A.col(); j++)
-					result[i][j] = row(i).dot(A.col(j));
+					result.get(i, j) = row(i).dot(A.col(j));
 			return result;
 		}
 
