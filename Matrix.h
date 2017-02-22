@@ -18,19 +18,19 @@ class Matrix
 
 	public:
 		// constructors
-		Matrix() {}
-		Matrix(size_t num_row, size_t num_col) : e(num_row, std::vector<T>(num_col)) {}
-		Matrix(const Matrix &A) : e(A.e) {}
-		Matrix(Matrix &&A) : e(A.e) {}
+		inline Matrix() {}
+		inline Matrix(size_t num_row, size_t num_col) : e(num_row, std::vector<T>(num_col)) {}
+		inline Matrix(const Matrix &A) : e(A.e) {}
+		inline Matrix(Matrix &&A) : e(A.e) {}
 
 		// assign operators
-		Matrix & operator=(const Matrix &A) {e = A.e; return *this;}
+		inline Matrix & operator=(const Matrix &A) {e = A.e; return *this;}
 
 		// clear
-		Matrix & clear() {e.clear(); return *this;}
+		inline Matrix & clear() {e.clear(); return *this;}
 
 		// resize
-		Matrix & resize(size_t r, size_t c)
+		inline Matrix & resize(size_t r, size_t c)
 		{
 			e.resize(r);
 			for (std::vector<T> &v : e)
@@ -39,12 +39,12 @@ class Matrix
 		}
 
 		// reserve
-		Matrix & reserve_row(size_t r)
+		inline Matrix & reserve_row(size_t r)
 		{
 			e.reserve(r);
 			return *this;
 		}
-		Matrix & reserve_col(size_t c)
+		inline Matrix & reserve_col(size_t c)
 		{
 			for (std::vector<T> &v : e)
 				v.reserve(c);
@@ -52,7 +52,7 @@ class Matrix
 		}
 
 		// add rows
-		Matrix & add_row(const Vector<T> &v)
+		inline Matrix & add_row(const Vector<T> &v)
 		{
 			if (v.size() != col())
 				throw std::invalid_argument("adding rows with different dimensions");
@@ -61,7 +61,7 @@ class Matrix
 		}
 
 		// add cols
-		Matrix & add_col(const Vector<T> &v)
+		inline Matrix & add_col(const Vector<T> &v)
 		{
 			if (v.size() != row())
 				throw std::invalid_argument("adding cols with different dimensions");
@@ -71,11 +71,11 @@ class Matrix
 		}
 
 		// accessor
-		T & get(size_t r, size_t c) {return e[r][c];}
-		const T & get(size_t r, size_t c) const {return e[r][c];}
+		inline T & get(size_t r, size_t c) {return e[r][c];}
+		inline const T & get(size_t r, size_t c) const {return e[r][c];}
 
 		// access const rows
-		Vector<T const> row(size_t r) const
+		inline Vector<T const> row(size_t r) const
 		{
 			Vector<T const> v;
 			for (const T &c : e[r])
@@ -84,7 +84,7 @@ class Matrix
 		}
 
 		// access rows
-		Vector<T> row(size_t r)
+		inline Vector<T> row(size_t r)
 		{
 			Vector<T> v;
 			for (T &c : e[r])
@@ -93,10 +93,10 @@ class Matrix
 		}
 
 		// access number of rows
-		size_t row() const {return e.size();}
+		inline size_t row() const {return e.size();}
 
 		// access const cols
-		Vector<T const> col(size_t c) const
+		inline Vector<T const> col(size_t c) const
 		{
 			Vector<T const> v;
 			for (const std::vector<T> &row : e)
@@ -105,7 +105,7 @@ class Matrix
 		}
 
 		// access cols
-		Vector<T> col(size_t c)
+		inline Vector<T> col(size_t c)
 		{
 			Vector<T> v;
 			for (std::vector<T> &row : e)
@@ -114,11 +114,11 @@ class Matrix
 		}
 
 		// access number of cols
-		size_t col() const {if (e.empty()) return 0; else return e.front().size();}
+		inline size_t col() const {if (e.empty()) return 0; else return e.front().size();}
 
 		// input
 		template<typename Char>
-		friend std::basic_istream<Char> & operator>>(std::basic_istream<Char> &is, Matrix &A)
+		inline friend std::basic_istream<Char> & operator>>(std::basic_istream<Char> &is, Matrix &A)
 		{
 			A.e.clear();
 			std::basic_string<Char> row;
@@ -154,7 +154,7 @@ class Matrix
 
 		// output
 		template<typename Char>
-		friend std::basic_ostream<Char> & operator<<(std::basic_ostream<Char> &os, const Matrix &A)
+		inline friend std::basic_ostream<Char> & operator<<(std::basic_ostream<Char> &os, const Matrix &A)
 		{
 			for (const std::vector<T> &v : A.e)
 			{
@@ -173,7 +173,7 @@ class Matrix
 		}
 
 		// line reduce into REF
-		Matrix & reduce_to_ref(size_t aug = 0)
+		inline Matrix & reduce_to_ref(size_t aug = 0)
 		{
 			size_t leading = 0;
 			for (size_t j = 0; leading < row() && j < col() - aug; j++)
@@ -201,11 +201,11 @@ class Matrix
 		}
 
 		// get the reduced form of the Matrix
-		Matrix ref(size_t aug = 0) const {return Matrix(*this).reduce_to_ref(aug);}
+		inline Matrix ref(size_t aug = 0) const {return Matrix(*this).reduce_to_ref(aug);}
 
 		// determinant
 		// use the naive method
-		T det() const
+		inline T det() const
 		{
 			if (row() != col())
 				throw std::invalid_argument("determinant of non-square Matrix");

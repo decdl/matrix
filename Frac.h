@@ -3,7 +3,8 @@
 #define _FRAC_H_
 
 #include <stdexcept>
-#include <cstdint>
+#include <utility>
+#include <cstddef>
 #include <istream>
 #include <ostream>
 #include <string>
@@ -15,17 +16,17 @@ class Frac
 	private:
 		bool s;
 		T n, d;
-		static T gcd(T x, T y);
+		static inline T gcd(T x, T y);
 		inline void standarize();
 	public:
 		const T &num, &den;
 		const bool &neg;
-		Frac(T numerator = 0, T denominator = 1, bool negative = false) : s(negative), n(numerator), d(denominator), num(n), den(d), neg(s) {standarize();}
-		Frac(const Frac &rhs) : s(rhs.s), n(rhs.n), d(rhs.d), num(n), den(d), neg(s) {}
+		inline Frac(T numerator = 0, T denominator = 1, bool negative = false) : s(negative), n(numerator), d(denominator), num(n), den(d), neg(s) {standarize();}
+		inline Frac(const Frac &rhs) : s(rhs.s), n(rhs.n), d(rhs.d), num(n), den(d), neg(s) {}
 		inline Frac & operator=(const Frac &rhs);
-		operator double() const {return s ? - static_cast<double>(n) / static_cast<double>(d) : static_cast<double>(n) / static_cast<double>(d);}
-		Frac operator-() const {return Frac(n, d, !neg);}
-		Frac inverse() const {return Frac(d, n, neg);}
+		inline operator double() const {return s ? - static_cast<double>(n) / static_cast<double>(d) : static_cast<double>(n) / static_cast<double>(d);}
+		inline Frac operator-() const {return Frac(n, d, !neg);}
+		inline Frac inverse() const {return Frac(d, n, neg);}
 		inline Frac & operator+=(const Frac &rhs);
 		inline Frac & operator-=(const Frac &rhs);
 		inline Frac & operator*=(const Frac &rhs);
@@ -33,11 +34,17 @@ class Frac
 };
 
 template<typename T>
-T Frac<T>::gcd(T x, T y)
+inline T Frac<T>::gcd(T x, T y)
 {
-	if (y == 0)
-		return x;
-	return gcd(y, x % y);
+	if (x < y)
+		std::swap(x, y);
+	while (y != 0)
+	{
+		T t = std::move(y);
+		y = x % t;
+		x = std::move(t);
+	}
+	return x;
 }
 
 template<typename T>
@@ -60,7 +67,7 @@ inline Frac<T> & Frac<T>::operator=(const Frac<T> &rhs)
 }
 
 template<typename T>
-Frac<T> operator+(const Frac<T> &lhs, const Frac<T> &rhs)
+inline Frac<T> operator+(const Frac<T> &lhs, const Frac<T> &rhs)
 {
 	if (lhs.neg)
 		return -(-lhs + -rhs);
@@ -73,7 +80,7 @@ Frac<T> operator+(const Frac<T> &lhs, const Frac<T> &rhs)
 }
 
 template<typename T>
-Frac<T> operator-(const Frac<T> &lhs, const Frac<T> &rhs)
+inline Frac<T> operator-(const Frac<T> &lhs, const Frac<T> &rhs)
 {
 	if (lhs.neg)
 		return -(-lhs + rhs);
@@ -87,7 +94,7 @@ Frac<T> operator-(const Frac<T> &lhs, const Frac<T> &rhs)
 }
 
 template<typename T>
-Frac<T> operator*(const Frac<T> &lhs, const Frac<T> &rhs)
+inline Frac<T> operator*(const Frac<T> &lhs, const Frac<T> &rhs)
 {
 	return Frac<T>(
 			lhs.num * rhs.num,
@@ -96,7 +103,7 @@ Frac<T> operator*(const Frac<T> &lhs, const Frac<T> &rhs)
 }
 
 template<typename T>
-Frac<T> operator/(const Frac<T> &lhs, const Frac<T> &rhs)
+inline Frac<T> operator/(const Frac<T> &lhs, const Frac<T> &rhs)
 {
 	return lhs * rhs.inverse();
 }
