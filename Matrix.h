@@ -240,7 +240,19 @@ class Matrix
 					result.get(i, j) = row(i).dot(A.col(j));
 			return result;
 		}
+		inline Matrix & operator*=(const Matrix &A) {return *this = *this * A;}
 
+		// linear transformation
+		inline Vector<T> operator*(const Vector<T> &v) const
+		{
+			if (col() != v.size())
+				throw std::invalid_argument("linear transformation with incompatible dimensions");
+			Vector<T> result(row());
+			for (size_t i = 0; i < row(); i++)
+				result[i] = row(i).dot(v);
+			return result;
+		}
+		inline Vector<T> & transform(Vector<T> &v) const {v = *this * v;}
 };
 
 #endif

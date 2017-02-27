@@ -87,22 +87,20 @@ class Vector : private std::vector<typename std::conditional<C, const T *, T *>:
 				// post-decreament
 				inline _iter operator--(int) {_iter copy(*this); --iter; return copy;}
 
-				// compound adding an offset
+				// compound addition with an offset
 				inline _iter & operator+=(const difference_type &offset) {iter += offset; return *this;}
 
-				// compound subtracting an offset
+				// compound subtraction by an offset
 				inline _iter & operator-=(const difference_type &offset) {iter -= offset; return *this;}
 
-				// adding an offset
+				// addition with an offset
 				inline _iter operator+(const difference_type &offset) const {return _iter(*this) += offset;}
-
-				// added by an offset
 				friend inline _iter operator+(const difference_type &offset, _iter copy) {return copy += offset;}
 
-				// subtracting an offset
+				// subtraction by an offset
 				inline _iter operator-(const difference_type &offset) const {return _iter(*this) -= offset;}
 
-				// subtracting an iterator
+				// subtraction by an iterator
 				inline difference_type operator-(const _iter &rhs) const {return iter - rhs.iter;}
 
 				// less than
@@ -138,7 +136,7 @@ class Vector : private std::vector<typename std::conditional<C, const T *, T *>:
 			if (own_data())
 			{
 				v.clear();
-				for (T &e : data)
+				for (T_CV &e : data)
 					push_back(e);
 			}
 			else
@@ -149,7 +147,7 @@ class Vector : private std::vector<typename std::conditional<C, const T *, T *>:
 		inline Vector(const Vector &v) : data(v.data)
 		{
 			if (own_data())
-				for (T &e : data)
+				for (T_CV &e : data)
 					push_back(e);
 			else
 				std::vector<T_CV*>::operator=(v);
@@ -159,6 +157,13 @@ class Vector : private std::vector<typename std::conditional<C, const T *, T *>:
 		inline Vector(std::vector<T_CV> &v)
 		{
 			for (T_CV &e : v)
+				push_back(e);
+		}
+
+		// construct with elements
+		inline Vector(size_t n) : data(n)
+		{
+			for (T_CV &e : data)
 				push_back(e);
 		}
 
@@ -242,7 +247,7 @@ class Vector : private std::vector<typename std::conditional<C, const T *, T *>:
 			return *std::vector<T_CV*>::operator[](n);
 		}
 
-		// compound divided by a scalar
+		// compound division by a scalar
 		template<typename scalar>
 		inline Vector & operator/=(scalar c)
 		{
@@ -251,14 +256,14 @@ class Vector : private std::vector<typename std::conditional<C, const T *, T *>:
 			return *this;
 		}
 
-		// divided by a scalar
+		// division by a scalar
 		template<typename scalar>
 		inline Vector operator/(scalar c) const
 		{
 			return this->copy() /= c;
 		}
 
-		// compound multipling a scalar
+		// compound multiplication with a scalar
 		template<typename scalar>
 		inline Vector & operator*=(scalar c)
 		{
@@ -267,21 +272,19 @@ class Vector : private std::vector<typename std::conditional<C, const T *, T *>:
 			return *this;
 		}
 
-		// multipling a scalar
+		// multiplication with a scalar
 		template<typename scalar>
 		inline Vector operator*(scalar c) const
 		{
 			return this->copy() *= c;
 		}
-
-		// multiplied by a scalar
 		template<typename scalar>
 		friend inline Vector operator*(scalar c, const Vector &v)
 		{
 			return v * c;
 		}
 
-		// compound adding a Vector
+		// compound addition with a Vector
 		inline Vector & operator+=(const Vector &rhs)
 		{
 			if (size() != rhs.size())
@@ -293,13 +296,13 @@ class Vector : private std::vector<typename std::conditional<C, const T *, T *>:
 			return *this;
 		}
 
-		// adding Vectors
+		// addition Vectors
 		inline Vector operator+(const Vector &rhs) const
 		{
 			return this->copy() += rhs;
 		}
 
-		// compound subtracting a Vector
+		// compound subtraction by a Vector
 		inline Vector & operator-=(const Vector &rhs)
 		{
 			if (size() != rhs.size())
@@ -311,7 +314,7 @@ class Vector : private std::vector<typename std::conditional<C, const T *, T *>:
 			return *this;
 		}
 
-		// subtracting Vectors
+		// subtraction by a Vector
 		inline Vector operator-(const Vector &rhs) const
 		{
 			return this->copy() -= rhs;
