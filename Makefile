@@ -1,7 +1,7 @@
 
 CXX = g++
-CXX_FLAGS = -c -std=c++17 $F
-LD_FLAGS = $F
+CXX_FLAGS = -c -std=c++17 $C
+LD_FLAGS = $L
 
 all: matrix
 
