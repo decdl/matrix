@@ -32,6 +32,8 @@ const char * help_msg[] = {
 	"	\e[1mexit\e[0m:	quit the program",
 	"	\e[1mref\e[0m:	reduce matrix to reduced echelon form",
 	"	\e[1mdet\e[0m:	calculate determinant",
+	"	\e[1madd\e[0m:	matrix addition",
+	"	\e[1msub\e[0m:	matrix subtraction",
 	"	\e[1mmul\e[0m:	matrix multiplication"
 };
 
@@ -63,6 +65,24 @@ const struct
 			matrix_t A;
 			std::cin >> A;
 			std::cout << A.det() << std::endl;
+			throw continue_signal();
+		}
+	},
+
+	{"add", []()
+		{
+			matrix_t A, B;
+			std::cin >> A >> B;
+			std::cout << A+B << std::endl;
+			throw continue_signal();
+		}
+	},
+
+	{"sub", []()
+		{
+			matrix_t A, B;
+			std::cin >> A >> B;
+			std::cout << A-B << std::endl;
 			throw continue_signal();
 		}
 	},

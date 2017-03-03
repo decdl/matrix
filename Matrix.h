@@ -229,6 +229,28 @@ class Matrix
 			return result;
 		}
 
+		// matrix addition
+		inline Matrix & operator+=(const Matrix &A)
+		{
+			if (row() != A.row() || col() != A.col())
+				throw std::invalid_argument("matrix addition with incompatible dimensions");
+			for (size_t i = 0; i < row(); i++)
+				row(i) += A.row(i);
+			return *this;
+		}
+		inline Matrix operator+(const Matrix &A) const {return Matrix(*this) += A;}
+
+		// matrix subtraction
+		inline Matrix & operator-=(const Matrix &A)
+		{
+			if (row() != A.row() || col() != A.col())
+				throw std::invalid_argument("matrix subtraction with incompatible dimensions");
+			for (size_t i = 0; i < row(); i++)
+				row(i) -= A.row(i);
+			return *this;
+		}
+		inline Matrix operator-(const Matrix &A) const {return Matrix(*this) -= A;}
+
 		// matrix multiplication
 		inline Matrix operator*(const Matrix &A) const
 		{
