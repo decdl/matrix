@@ -16,10 +16,12 @@ class Vector : private std::vector<typename std::conditional<C, const T *, T *>:
 		std::vector<T> data;
 		inline void construct_self()
 		{
-			for (T &e : data)
+			for (T_CV &e : data)
 				push_back(e);
 		}
 		inline Vector(const Vector &rhs, copy_tag) : data(rhs) {construct_self();}
+		friend class Vector<T, true>;
+		friend class Vector<T, false>;
 		friend std::vector<T_CV*> & std::vector<T_CV*>::operator=(const std::vector<T_CV*> &);
 	public:
 		// iterator and const_iterator definition
@@ -131,24 +133,24 @@ class Vector : private std::vector<typename std::conditional<C, const T *, T *>:
 		inline Vector() {}
 
 		// copy-constructor with rvlaue
-		inline Vector(Vector &&v) : data(std::forward<std::vector<T>>(v.data))
+		template<bool C_RHS>
+		inline Vector(Vector<T, C_RHS> &&v) : data(std::forward<std::vector<T>>(v.data))
 		{
 			if (own_data())
 			{
 				v.clear();
-				for (T_CV &e : data)
-					push_back(e);
+				construct_self();
 			}
 			else
 				std::vector<T_CV*>::operator=(std::forward<Vector>(v));
 		}
 
 		// copy-constructor with lvalue
-		inline Vector(const Vector &v) : data(v.data)
+		template<bool C_RHS>
+		inline Vector(const Vector<T, C_RHS> &v) : data(v.data)
 		{
 			if (own_data())
-				for (T_CV &e : data)
-					push_back(e);
+				construct_self();
 			else
 				std::vector<T_CV*>::operator=(v);
 		}
@@ -163,9 +165,9 @@ class Vector : private std::vector<typename std::conditional<C, const T *, T *>:
 		// construct with elements
 		inline Vector(size_t n) : data(n)
 		{
-			for (T_CV &e : data)
-				push_back(e);
+			construct_self();
 		}
+
 
 		// modifiers
 
@@ -177,14 +179,16 @@ class Vector : private std::vector<typename std::conditional<C, const T *, T *>:
 		}
 
 		// copy-assign operator with rvalue
-		inline Vector & operator=(Vector &&v)
+		template<bool C_RHS>
+		inline Vector & operator=(Vector<T, C_RHS> &&v)
 		{
 			std::vector<T_CV*>::operator=(std::forward(v));
 			return *this;
 		}
 
 		// copy-assign operator with lvalue
-		inline Vector & operator=(const Vector &v)
+		template<bool C_RHS>
+		inline Vector & operator=(const Vector<T, C_RHS> &v)
 		{
 			std::vector<T_CV*>::operator=(v);
 			return *this;
@@ -285,43 +289,48 @@ class Vector : private std::vector<typename std::conditional<C, const T *, T *>:
 		}
 
 		// compound addition with a Vector
-		inline Vector & operator+=(const Vector &rhs)
+		template<bool C_RHS>
+		inline Vector & operator+=(const Vector<T, C_RHS> &rhs)
 		{
 			if (size() != rhs.size())
 				throw std::invalid_argument("Vector addition with different dimensions");
 			iterator it0 = begin();
-			const_iterator it1 = rhs.begin();
+			auto it1 = rhs.begin();
 			while (it0 != end())
 				*(it0++) += *(it1++);
 			return *this;
 		}
 
 		// addition Vectors
-		inline Vector operator+(const Vector &rhs) const
+		template<bool C_RHS>
+		inline Vector operator+(const Vector<T, C_RHS> &rhs) const
 		{
 			return this->copy() += rhs;
 		}
 
 		// compound subtraction by a Vector
-		inline Vector & operator-=(const Vector &rhs)
+		template<bool C_RHS>
+		inline Vector & operator-=(const Vector<T, C_RHS> &rhs)
 		{
 			if (size() != rhs.size())
 				throw std::invalid_argument("Vector subtraction with different dimensions");
 			iterator it0 = begin();
-			const_iterator it1 = rhs.begin();
+			auto it1 = rhs.begin();
 			while (it0 != end())
 				*(it0++) -= *(it1++);
 			return *this;
 		}
 
 		// subtraction by a Vector
-		inline Vector operator-(const Vector &rhs) const
+		template<bool C_RHS>
+		inline Vector operator-(const Vector<T, C_RHS> &rhs) const
 		{
 			return this->copy() -= rhs;
 		}
 
 		// dot product
-		inline T dot(const Vector &rhs) const
+		template<bool C_RHS>
+		inline T dot(const Vector<T, C_RHS> &rhs) const
 		{
 			if (size() != rhs.size())
 				throw std::invalid_argument("dot product between different dimensions");
