@@ -13,15 +13,29 @@ class Vector : private std::vector<typename std::conditional<C, const T *, T *>:
 	private:
 		typedef typename std::conditional<C, const T, T>::type T_CV;
 		class copy_tag{};
-		std::vector<T> data;
-		inline void construct_self()
+		T *data;
+		inline void construct_self(size_t n, bool alloc)
 		{
-			for (T_CV &e : data)
-				push_back(e);
+			if (alloc)
+			{
+				if (data != nullptr)
+					delete [] data;
+				data = new T[n];
+			}
+			std::vector<T_CV*>::clear();
+			for (size_t i = 0; i < n; i++)
+				std::vector<T_CV*>::push_back(data + i);
 		}
-		inline Vector(const Vector &rhs, copy_tag) : data(rhs) {construct_self();}
-		friend class Vector<T, true>;
-		friend class Vector<T, false>;
+		inline Vector(const Vector &rhs, copy_tag) : data(nullptr)
+		{
+			construct_self(rhs.size(), true);
+			for (size_t i = 0; i < rhs.size(); i++)
+			{
+				data[i] = rhs[i];
+			}
+		}
+		friend Vector<T, true>;
+		friend Vector<T, false>;
 		friend std::vector<T_CV*> & std::vector<T_CV*>::operator=(const std::vector<T_CV*> &);
 	public:
 		// iterator and const_iterator definition
@@ -127,19 +141,30 @@ class Vector : private std::vector<typename std::conditional<C, const T *, T *>:
 		typedef _iter<false> iterator;
 
 
+		// destructor
+		virtual ~Vector()
+		{
+			if (data != nullptr)
+				delete [] data;
+		}
+
 		// constructors
 
 		// default constructor
-		inline Vector() {}
+		inline Vector() : data(nullptr) {}
+
+		Vector(const Vector &) = delete;
 
 		// copy-constructor with rvlaue
 		template<bool C_RHS>
-		inline Vector(Vector<T, C_RHS> &&v) : data(std::forward<std::vector<T>>(v.data))
+		inline Vector(Vector<T, C_RHS> &&v) : data(nullptr)
 		{
-			if (own_data())
+			if (v.own_data())
 			{
+				data = v.data;
+				v.data = nullptr;
+				construct_self(v.size(), false);
 				v.clear();
-				construct_self();
 			}
 			else
 				std::vector<T_CV*>::operator=(std::forward<Vector>(v));
@@ -147,25 +172,29 @@ class Vector : private std::vector<typename std::conditional<C, const T *, T *>:
 
 		// copy-constructor with lvalue
 		template<bool C_RHS>
-		inline Vector(const Vector<T, C_RHS> &v) : data(v.data)
+		inline Vector(const Vector<T, C_RHS> &v) : data(nullptr)
 		{
-			if (own_data())
-				construct_self();
+			if (v.own_data())
+			{
+				construct_self(v.size(), true);
+				for (size_t i = 0; i < size(); i++)
+					data[i] = v[i];
+			}
 			else
 				std::vector<T_CV*>::operator=(v);
 		}
 
 		// construct from a std::vector
-		inline Vector(std::vector<T_CV> &v)
+		inline Vector(std::vector<T_CV> &v) : data(nullptr)
 		{
 			for (T_CV &e : v)
-				push_back(e);
+				std::vector<T_CV*>::push_back(&e);
 		}
 
 		// construct with elements
-		inline Vector(size_t n) : data(n)
+		inline Vector(size_t n) : data(nullptr)
 		{
-			construct_self();
+			construct_self(n, true);
 		}
 
 
@@ -174,15 +203,36 @@ class Vector : private std::vector<typename std::conditional<C, const T *, T *>:
 		// adding components
 		inline Vector & push_back(T_CV &c)
 		{
-			std::vector<T_CV*>::push_back(&c);
+			if (own_data())
+			{
+				T *copy = new T[size() + 1];
+				for (size_t i = 0; i < size(); i++)
+					copy[i] = data[i];
+				copy[size()] = c;
+				delete [] data;
+				data = copy;
+				construct_self(size() + 1, false);
+			}
+			else
+				std::vector<T_CV*>::push_back(&c);
 			return *this;
 		}
+
+		Vector & operator=(const Vector &) = delete;
 
 		// copy-assign operator with rvalue
 		template<bool C_RHS>
 		inline Vector & operator=(Vector<T, C_RHS> &&v)
 		{
-			std::vector<T_CV*>::operator=(std::forward(v));
+			data = v.data;
+			if (own_data())
+			{
+				construct_self(v.size(), false);
+				v.data = nullptr;
+				v.clear();
+			}
+			else
+				std::vector<T_CV*>::operator=(std::forward(v));
 			return *this;
 		}
 
@@ -190,18 +240,25 @@ class Vector : private std::vector<typename std::conditional<C, const T *, T *>:
 		template<bool C_RHS>
 		inline Vector & operator=(const Vector<T, C_RHS> &v)
 		{
-			std::vector<T_CV*>::operator=(v);
+			if (v.own_data())
+			{
+				construct_self(v.size(), true);
+				for (size_t i = 0; i < v.size(); i++)
+					data[i] = v[i];
+			}
+			else
+				std::vector<T_CV*>::operator=(v);
 			return *this;
 		}
 
 		// return a copy of underlying data
-		inline Vector copy() const
+		inline Vector<T, false> copy() const
 		{
-			return Vector(*this, copy_tag());
+			return Vector<T, false>(*this, copy_tag());
 		}
 
 		// check if owns data
-		inline bool own_data() {return !data.empty();}
+		inline bool own_data() const {return data != nullptr;}
 
 		// cast into std::vector
 		inline operator std::vector<T>() const
@@ -253,34 +310,38 @@ class Vector : private std::vector<typename std::conditional<C, const T *, T *>:
 
 		// compound division by a scalar
 		template<typename scalar>
-		inline Vector & operator/=(scalar c)
+		inline Vector & operator/=(scalar c) &
 		{
 			for (T &e : *this)
 				e /= c;
 			return *this;
 		}
+		template<typename scalar>
+		inline Vector && operator/=(scalar c) && {*this /= c; return std::move(*this);}
 
 		// division by a scalar
 		template<typename scalar>
 		inline Vector operator/(scalar c) const
 		{
-			return this->copy() /= c;
+			return copy() /= c;
 		}
 
 		// compound multiplication with a scalar
 		template<typename scalar>
-		inline Vector & operator*=(scalar c)
+		inline Vector & operator*=(scalar c) &
 		{
 			for (T &e : *this)
 				e *= c;
 			return *this;
 		}
+		template<typename scalar>
+		inline Vector && operator*=(scalar c) && {*this *= c; return std::move(*this);}
 
 		// multiplication with a scalar
 		template<typename scalar>
 		inline Vector operator*(scalar c) const
 		{
-			return this->copy() *= c;
+			return copy() *= c;
 		}
 		template<typename scalar>
 		friend inline Vector operator*(scalar c, const Vector &v)
@@ -290,42 +351,46 @@ class Vector : private std::vector<typename std::conditional<C, const T *, T *>:
 
 		// compound addition with a Vector
 		template<bool C_RHS>
-		inline Vector & operator+=(const Vector<T, C_RHS> &rhs)
+		inline Vector & operator+=(const Vector<T, C_RHS> &rhs) &
 		{
 			if (size() != rhs.size())
 				throw std::invalid_argument("Vector addition with different dimensions");
-			iterator it0 = begin();
+			auto it0 = begin();
 			auto it1 = rhs.begin();
 			while (it0 != end())
 				*(it0++) += *(it1++);
 			return *this;
 		}
+		template<typename scalar>
+		inline Vector && operator+=(scalar c) && {*this += c; return std::move(*this);}
 
 		// addition Vectors
 		template<bool C_RHS>
 		inline Vector operator+(const Vector<T, C_RHS> &rhs) const
 		{
-			return this->copy() += rhs;
+			return copy() += rhs;
 		}
 
 		// compound subtraction by a Vector
 		template<bool C_RHS>
-		inline Vector & operator-=(const Vector<T, C_RHS> &rhs)
+		inline Vector & operator-=(const Vector<T, C_RHS> &rhs) &
 		{
 			if (size() != rhs.size())
 				throw std::invalid_argument("Vector subtraction with different dimensions");
-			iterator it0 = begin();
+			auto it0 = begin();
 			auto it1 = rhs.begin();
 			while (it0 != end())
 				*(it0++) -= *(it1++);
 			return *this;
 		}
+		template<typename scalar>
+		inline Vector && operator-=(scalar c) && {*this -= c; return std::move(*this);}
 
 		// subtraction by a Vector
 		template<bool C_RHS>
 		inline Vector operator-(const Vector<T, C_RHS> &rhs) const
 		{
-			return this->copy() -= rhs;
+			return copy() -= rhs;
 		}
 
 		// dot product
@@ -335,8 +400,8 @@ class Vector : private std::vector<typename std::conditional<C, const T *, T *>:
 			if (size() != rhs.size())
 				throw std::invalid_argument("dot product between different dimensions");
 			T result = static_cast<T>(0);
-			const_iterator it0 = begin(),
-						   it1 = rhs.begin();
+			auto it0 = begin();
+			auto it1 = rhs.begin();
 			while (it0 != end())
 				result += *(it0++) * *(it1++);
 			return result;
