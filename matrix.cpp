@@ -6,14 +6,18 @@ class continue_signal {};
 
 typedef Matrix<Frac<unsigned int>> matrix_t;
 
-[[noreturn]] inline void bad_input() {throw std::ios::failure("invalid input");}
+// throw i/o exceptions manually to avoid abi difference of std::ios_base::failure
+inline void check_input()
+{
+	if (std::cin.fail())
+		throw std::ios_base::failure("invalid input");
+}
 
 inline bool prompt(std::string &cmd)
 {
 	std::cout << "matrix> ";
 	std::getline(std::cin, cmd);
-	if (!std::cin)
-		bad_input();
+	check_input();
 	if (cmd == "exit")
 		return true;
 	return false;
@@ -55,6 +59,7 @@ const struct
 		{
 			matrix_t A;
 			std::cin >> A;
+			check_input();
 			std::cout << A.ref() << std::endl;
 			throw continue_signal();
 		}
@@ -64,6 +69,7 @@ const struct
 		{
 			matrix_t A;
 			std::cin >> A;
+			check_input();
 			std::cout << A.det() << std::endl;
 			throw continue_signal();
 		}
@@ -73,6 +79,7 @@ const struct
 		{
 			matrix_t A, B;
 			std::cin >> A >> B;
+			check_input();
 			std::cout << A+B << std::endl;
 			throw continue_signal();
 		}
@@ -82,6 +89,7 @@ const struct
 		{
 			matrix_t A, B;
 			std::cin >> A >> B;
+			check_input();
 			std::cout << A-B << std::endl;
 			throw continue_signal();
 		}
@@ -91,6 +99,7 @@ const struct
 		{
 			matrix_t A, B;
 			std::cin >> A >> B;
+			check_input();
 			std::cout << A*B << std::endl;
 			throw continue_signal();
 		}
@@ -99,7 +108,6 @@ const struct
 
 int main()
 {
-	std::cin.exceptions(std::ios::failbit);
 	std::string cmd;
 	while (true)
 	{
@@ -116,7 +124,7 @@ int main()
 		{
 			std::cerr << "\e[31mInvalid argument: " << e.what() << "\e[0m" << std::endl;
 		}
-		catch (const std::ios::failure &e)
+		catch (const std::ios_base::failure &e)
 		{
 			if (std::cin.eof())
 			{
